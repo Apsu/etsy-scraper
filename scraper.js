@@ -19,6 +19,7 @@ db.once("open", function() {
         href: String,
         thumb: String
     }); //itemSchema
+
     // Make a model
     var Item = mongoose.model("Item", itemSchema);
 
@@ -31,8 +32,8 @@ db.once("open", function() {
     var getPage = (function(page) {
         jsdom.env(
             "http://etsy.com/shop/" + shop + "?page=" + page,
-            ["http://code.jquery.com/jquery.js"],
-            function (errors, window) {
+            ["http://code.jquery.com/jquery.js"], // Inject jQuery for winnage
+            function(errors, window) {
                 var $ = window.$; // Store jQuery reference
                 $("#listing-wrapper ul li").each(function() { // For each
                     var item = {}; // Template
@@ -44,19 +45,19 @@ db.once("open", function() {
                     Item.update( // Update 
                         {_id: id}, // By ID
                         item, // Using this
-                        {upsert: true}, // Create if not found
+                        {upsert: true}, // Create if doesn't exist
                         function (err) {if(err) console.log("Update error: ", err);}); // Handle errors
-                });
+                }); // .each
                 numPages = numPages || $(".pager li a").last().attr("data-page"); // Snag if we don't have
                 if(page <= numPages) {
-                    getPage(page + 1); // Get next page
+                    getPage(page + 1); // Recurse into next page
                 } else {
                     mongoose.disconnect(); // Shutdown DB
                 }
-            } // function (errors, window)
+            } // function(errors, window)
         ); // jsdom.env
     }); // getPage
      
     getPage(1); // Get first page
-}); // db.once
+}); // db.once("open")
 
