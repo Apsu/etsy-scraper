@@ -59,5 +59,5 @@ db.once("open", function() {
     }); // getPage
      
     getPage(1); // Get first page
-}); // db.once("open")
+}); // db.once
 
